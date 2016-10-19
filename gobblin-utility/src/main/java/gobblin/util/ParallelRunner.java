@@ -303,10 +303,14 @@ public class ParallelRunner implements Closeable {
         lock.lock();
         try {
           if (ParallelRunner.this.fs.exists(src)) {
+            // change to "renamePath" for s3
+            HadoopUtils.renamePath(ParallelRunner.this.fs, src, dst);
+            /*
             HadoopUtils.movePath(ParallelRunner.this.fs, src, dstFs, dst, overwrite, dstFs.getConf());
             if (group.isPresent()) {
               HadoopUtils.setGroup(dstFs, dst, group.get());
             }
+            */
           }
           return null;
         } catch (FileAlreadyExistsException e) {

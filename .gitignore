@@ -50,3 +50,11 @@ out/
 **/mainGeneratedRest
 gobblin-dist*
 gobblin.tar.gz
+
+metastore_db
+GobblinKey*
+ParallelRunnerTest
+FsDatasetStateStoreTest
+commit-sequence-store-test
+
+

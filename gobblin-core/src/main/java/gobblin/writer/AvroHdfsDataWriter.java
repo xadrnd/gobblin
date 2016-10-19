@@ -67,7 +67,8 @@ public class AvroHdfsDataWriter extends FsDataWriter<GenericRecord> {
     this.datumWriter = new GenericDatumWriter<>();
     this.writer = this.closer.register(createDataFileWriter(codecFactory));
 
-    setStagingFileGroup();
+    // no need for S3
+    // setStagingFileGroup();
   }
 
   public FileSystem getFileSystem() {
