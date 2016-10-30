@@ -135,8 +135,10 @@ LIBJARS=(
   $FWDIR_LIB/gobblin-api-$GOBBLIN_VERSION.jar
   $FWDIR_LIB/gobblin-utility-$GOBBLIN_VERSION.jar
   $FWDIR_LIB/guava-15.0.jar
-  $FWDIR_LIB/avro-1.7.7.jar
-  $FWDIR_LIB/avro-mapred-1.7.7-hadoop2.jar
+  #$FWDIR_LIB/avro-1.7.7.jar
+  $FWDIR_LIB/avro-1.8.1.jar
+  #$FWDIR_LIB/avro-mapred-1.7.7-hadoop2.jar
+  $FWDIR_LIB/avro-mapred-1.8.1.jar
   $FWDIR_LIB/commons-lang3-3.4.jar
   $FWDIR_LIB/config-1.2.1.jar
   $FWDIR_LIB/data-1.15.9.jar
@@ -166,7 +168,7 @@ done
 export HADOOP_USER_CLASSPATH_FIRST=true
 export HADOOP_CLASSPATH=$GOBBLIN_DEP_JARS:$HADOOP_CLASSPATH
 
-GOBBLIN_CONFIG_FILE=$FWDIR_CONF/gobblin-mapreduce.properties
+#GOBBLIN_CONFIG_FILE=$FWDIR_CONF/gobblin-mapreduce.properties
 
 JT_COMMAND=$([ -z $JOB_TRACKER_URL ] && echo "" || echo "-jt $JOB_TRACKER_URL")
 FS_COMMAND=$([ -z $FS_URL ] && echo "" || echo "-fs $FS_URL")
@@ -179,6 +181,8 @@ $HADOOP_BIN_DIR/hadoop jar \
         gobblin.runtime.mapreduce.CliMRJobLauncher \
         -D mapreduce.user.classpath.first=true \
         -D mapreduce.job.user.classpath.first=true \
+        -D mapreduce.map.memory.mb=2048 \
+        -D fs.defaultFS=s3://comet-data \
         $JT_COMMAND \
         $FS_COMMAND \
         -libjars $LIBJARS \
