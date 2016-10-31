@@ -169,6 +169,8 @@ public class HadoopUtils {
    * {@link FileSystem#rename(Path, Path)} returns False.
    */
   public static void renamePath(FileSystem fs, Path oldName, Path newName, boolean overwrite) throws IOException {
+    // no need for s3
+    /*
     if (!fs.exists(oldName)) {
       throw new FileNotFoundException(String.format("Failed to rename %s to %s: src not found", oldName, newName));
     }
@@ -183,9 +185,26 @@ public class HadoopUtils {
             String.format("Failed to rename %s to %s: dst already exists", oldName, newName));
       }
     }
+    */
+
+    int retry = 5;
+    while (retry>0){
+      if(fs.rename(oldName, newName)){
+        break;
+      }else{
+        if(retry>0){
+          retry--;
+          log.warn(String.format("Failed to rename %s to %s, retry %s", oldName, newName, retry));
+        }else{
+          throw new IOException(String.format("Failed to rename %s to %s", oldName, newName));
+        }
+      }
+    }
+    /*
     if (!fs.rename(oldName, newName)) {
       throw new IOException(String.format("Failed to rename %s to %s", oldName, newName));
     }
+    */
   }
 
   /**

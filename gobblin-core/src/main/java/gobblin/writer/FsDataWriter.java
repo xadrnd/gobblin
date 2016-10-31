@@ -160,6 +160,8 @@ public abstract class FsDataWriter<D> implements DataWriter<D>, FinalState {
   public void commit() throws IOException {
     this.closer.close();
 
+    // no need for S3
+    /*
     if (!this.fs.exists(this.stagingFile)) {
       throw new IOException(String.format("File %s does not exist", this.stagingFile));
     }
@@ -168,6 +170,7 @@ public abstract class FsDataWriter<D> implements DataWriter<D>, FinalState {
     if (!this.fs.getFileStatus(this.stagingFile).getPermission().equals(this.filePermission)) {
       this.fs.setPermission(this.stagingFile, this.filePermission);
     }
+    */
 
     LOG.info(String.format("Moving data from %s to %s", this.stagingFile, this.outputFile));
     // For the same reason as deleting the staging file if it already exists, deleting
