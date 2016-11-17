@@ -7,10 +7,9 @@
     <param name="file" value="${gobblin.logs.dir}/gobblin-current.log" />
     <param name="append" value="true" />
     <param name="encoding" value="UTF-8" />
-
-    <rollingPolicy class="org.apache.log4j.rolling.TimeBasedRollingPolicy">
-      <param name="FileNamePattern" value="${gobblin.logs.dir}/archive/gobblin.%d{yyyy-MM-dd}.log"/>
-    </rollingPolicy>
+    
+    <param name="MaxFileSize" value="10MB" />
+    <param name="MaxBackupIndex" value="100" />
     
     <layout class="org.apache.log4j.PatternLayout">
       <param name="ConversionPattern" value="%d{yyyy-MM-dd HH:mm:ss z} %-5p [%t] %C %X{tableName} %L - %m%n"/>
