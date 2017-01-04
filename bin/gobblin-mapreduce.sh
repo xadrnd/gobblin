@@ -132,8 +132,11 @@ LIBJARS=(
   $FWDIR_LIB/gobblin-metastore-$GOBBLIN_VERSION.jar
   $FWDIR_LIB/gobblin-metrics-$GOBBLIN_VERSION.jar
   $FWDIR_LIB/gobblin-core-$GOBBLIN_VERSION.jar
+  $FWDIR_LIB/gobblin-core-base-$GOBBLIN_VERSION.jar
   $FWDIR_LIB/gobblin-api-$GOBBLIN_VERSION.jar
   $FWDIR_LIB/gobblin-utility-$GOBBLIN_VERSION.jar
+  $FWDIR_LIB/gobblin-kafka-08-$GOBBLIN_VERSION.jar
+  $FWDIR_LIB/gobblin-kafka-common-$GOBBLIN_VERSION.jar
   $FWDIR_LIB/guava-15.0.jar
   $FWDIR_LIB/avro-1.8.1.jar
   $FWDIR_LIB/avro-mapred-1.8.1.jar
@@ -166,7 +169,7 @@ done
 export HADOOP_USER_CLASSPATH_FIRST=true
 export HADOOP_CLASSPATH=$GOBBLIN_DEP_JARS:$HADOOP_CLASSPATH
 
-GOBBLIN_CONFIG_FILE=$FWDIR_CONF/gobblin-mapreduce.properties
+#GOBBLIN_CONFIG_FILE=$FWDIR_CONF/gobblin-mapreduce.properties
 
 JT_COMMAND=$([ -z $JOB_TRACKER_URL ] && echo "" || echo "-jt $JOB_TRACKER_URL")
 FS_COMMAND=$([ -z $FS_URL ] && echo "" || echo "-fs $FS_URL")
