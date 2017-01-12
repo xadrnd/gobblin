@@ -23,6 +23,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.lang.StringUtils;
+import org.apache.hadoop.conf.Configuration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -588,6 +589,12 @@ public abstract class AbstractJobLauncher implements JobLauncher {
         .addMetadata(Tag.toMap(Tag.tagValuesToString(tags))).build();
   }
 
+  public static void runWorkUnits(String jobId, String containerId, JobState jobState, List<WorkUnit> workUnits,
+                                  TaskStateTracker taskStateTracker, TaskExecutor taskExecutor, StateStore<TaskState> taskStateStore, Logger logger)
+          throws IOException, InterruptedException {
+    runWorkUnits(jobId, containerId, jobState,workUnits, taskStateTracker, taskExecutor, taskStateStore, logger, null);
+  }
+
   /**
    * Run a given list of {@link WorkUnit}s of a job.
    *
@@ -606,8 +613,13 @@ public abstract class AbstractJobLauncher implements JobLauncher {
    * @throws InterruptedException if the task execution gets cancelled
    */
   public static void runWorkUnits(String jobId, String containerId, JobState jobState, List<WorkUnit> workUnits,
-      TaskStateTracker taskStateTracker, TaskExecutor taskExecutor, StateStore<TaskState> taskStateStore, Logger logger)
+                                  TaskStateTracker taskStateTracker, TaskExecutor taskExecutor, StateStore<TaskState> taskStateStore, Logger logger, Configuration configuration)
       throws IOException, InterruptedException {
+
+    int FORCE_TIMEOUT = configuration.getInt("job.force.timeout", 0);
+    LOG.info("job.force.timeout: " + FORCE_TIMEOUT);
+    long timeOut = System.currentTimeMillis() + FORCE_TIMEOUT * 60 * 1000;
+    logger.info("FORCE_TIMEOUT: " + timeOut);
 
     if (workUnits.isEmpty()) {
       logger.warn("No work units to run in container " + containerId);
@@ -633,6 +645,18 @@ public abstract class AbstractJobLauncher implements JobLauncher {
           workUnits.size(), jobId, containerId));
       if (countDownLatch.await(10, TimeUnit.SECONDS)) {
         break;
+      }
+
+      // force timeout
+      if (FORCE_TIMEOUT!=0 && System.currentTimeMillis() > timeOut){
+        for(Task task : tasks){
+          logger.info("task " + task.getTaskId() + " has state " + task.getTaskState().getWorkingState());
+          if(task.getTaskState().getWorkingState() != WorkUnitState.WorkingState.SUCCESSFUL){
+            task.getTaskState().setWorkingState(WorkUnitState.WorkingState.FAILED);
+            countDownLatch.countDown();
+            logger.info("new countDown : " + countDownLatch.getCount());
+          }
+        }
       }
     }
     logger.info(String.format("All assigned tasks of job %s have completed in container %s", jobId, containerId));

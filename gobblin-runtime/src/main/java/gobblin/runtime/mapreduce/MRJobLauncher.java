@@ -12,35 +12,6 @@
 
 package gobblin.runtime.mapreduce;
 
-import java.io.DataOutputStream;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.net.URI;
-import java.util.List;
-import java.util.Properties;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
-
-import org.apache.hadoop.conf.Configuration;
-import org.apache.hadoop.fs.FileStatus;
-import org.apache.hadoop.fs.FileSystem;
-import org.apache.hadoop.fs.LocalFileSystem;
-import org.apache.hadoop.fs.Path;
-import org.apache.hadoop.io.LongWritable;
-import org.apache.hadoop.io.NullWritable;
-import org.apache.hadoop.io.Text;
-import org.apache.hadoop.mapreduce.Counter;
-import org.apache.hadoop.mapreduce.CounterGroup;
-import org.apache.hadoop.mapreduce.Counters;
-import org.apache.hadoop.mapreduce.Job;
-import org.apache.hadoop.mapreduce.Mapper;
-import org.apache.hadoop.mapreduce.filecache.DistributedCache;
-import org.apache.hadoop.mapreduce.lib.input.FileInputFormat;
-import org.apache.hadoop.mapreduce.lib.input.NLineInputFormat;
-import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Optional;
 import com.google.common.base.Splitter;
@@ -49,7 +20,6 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
 import com.google.common.io.Closer;
 import com.google.common.util.concurrent.ServiceManager;
-
 import gobblin.configuration.ConfigurationKeys;
 import gobblin.metastore.FsStateStore;
 import gobblin.metastore.StateStore;
@@ -57,23 +27,36 @@ import gobblin.metrics.GobblinMetrics;
 import gobblin.metrics.Tag;
 import gobblin.metrics.event.TimingEvent;
 import gobblin.password.PasswordManager;
-import gobblin.runtime.AbstractJobLauncher;
-import gobblin.runtime.JobLauncher;
-import gobblin.runtime.JobState;
-import gobblin.runtime.Task;
-import gobblin.runtime.TaskExecutor;
-import gobblin.runtime.TaskState;
-import gobblin.runtime.TaskStateCollectorService;
-import gobblin.runtime.TaskStateTracker;
+import gobblin.runtime.*;
 import gobblin.runtime.util.JobMetrics;
 import gobblin.runtime.util.MetricGroup;
 import gobblin.source.workunit.MultiWorkUnit;
 import gobblin.source.workunit.WorkUnit;
-import gobblin.util.HadoopUtils;
-import gobblin.util.JobConfigurationUtils;
-import gobblin.util.JobLauncherUtils;
-import gobblin.util.ParallelRunner;
-import gobblin.util.SerializationUtils;
+import gobblin.util.*;
+import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.fs.FileStatus;
+import org.apache.hadoop.fs.FileSystem;
+import org.apache.hadoop.fs.LocalFileSystem;
+import org.apache.hadoop.fs.Path;
+import org.apache.hadoop.io.LongWritable;
+import org.apache.hadoop.io.NullWritable;
+import org.apache.hadoop.io.Text;
+import org.apache.hadoop.mapreduce.*;
+import org.apache.hadoop.mapreduce.filecache.DistributedCache;
+import org.apache.hadoop.mapreduce.lib.input.FileInputFormat;
+import org.apache.hadoop.mapreduce.lib.input.NLineInputFormat;
+import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.io.DataOutputStream;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.net.URI;
+import java.util.List;
+import java.util.Properties;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 
 
 /**
@@ -527,6 +510,8 @@ public class MRJobLauncher extends AbstractJobLauncher {
     // A list of WorkUnits (flattened for MultiWorkUnits) to be run by this mapper
     private final List<WorkUnit> workUnits = Lists.newArrayList();
 
+    private Configuration configuration;
+
     @Override
     protected void setup(Context context) {
       try (Closer closer = Closer.create()) {
@@ -562,7 +547,7 @@ public class MRJobLauncher extends AbstractJobLauncher {
         throw new RuntimeException(te);
       }
 
-      Configuration configuration = context.getConfiguration();
+      configuration = context.getConfiguration();
 
       // Setup and start metrics reporting if metric reporting is enabled
       if (Boolean.valueOf(
@@ -585,7 +570,7 @@ public class MRJobLauncher extends AbstractJobLauncher {
         }
         // Actually run the list of WorkUnits
         runWorkUnits(this.jobState.getJobId(), context.getTaskAttemptID().toString(), this.jobState, this.workUnits,
-            this.taskStateTracker, this.taskExecutor, this.taskStateStore, LOG);
+            this.taskStateTracker, this.taskExecutor, this.taskStateStore, LOG, configuration);
       } finally {
         this.cleanup(context);
       }
