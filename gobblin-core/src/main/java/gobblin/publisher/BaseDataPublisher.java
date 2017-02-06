@@ -12,15 +12,19 @@
 
 package gobblin.publisher;
 
-import java.io.IOException;
-import java.net.URI;
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
+import com.google.common.base.Optional;
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
+import com.google.common.collect.Sets;
+import com.google.common.io.Closer;
+import gobblin.configuration.ConfigurationKeys;
+import gobblin.configuration.State;
+import gobblin.configuration.WorkUnitState;
+import gobblin.util.ForkOperatorUtils;
 import gobblin.util.HadoopUtils;
+import gobblin.util.ParallelRunner;
+import gobblin.util.WriterUtils;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FSDataOutputStream;
 import org.apache.hadoop.fs.FileStatus;
@@ -30,19 +34,9 @@ import org.apache.hadoop.fs.permission.FsPermission;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.google.common.base.Optional;
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
-import com.google.common.collect.Sets;
-import com.google.common.io.Closer;
-
-import gobblin.configuration.State;
-import gobblin.configuration.WorkUnitState;
-import gobblin.configuration.ConfigurationKeys;
-import gobblin.util.ForkOperatorUtils;
-import gobblin.util.ParallelRunner;
-import gobblin.util.WriterUtils;
+import java.io.IOException;
+import java.net.URI;
+import java.util.*;
 
 
 /**
@@ -201,8 +195,13 @@ public class BaseDataPublisher extends SingleTaskDataPublisher {
     Path writerOutputDir = WriterUtils.getWriterOutputDir(state, this.numBranches, branchId);
 
     if (!this.writerFileSystemByBranches.get(branchId).exists(writerOutputDir)) {
+      LOG.info("branchtest 0 " + this.writerFileSystemByBranches.size()+ " "+ branchId+ " "+ writerOutputDir);
+      for(FileSystem fs : this.writerFileSystemByBranches){
+        LOG.info("branchtest 1 " + fs.toString() + " " + this.writerFileSystemByBranches.get(branchId).exists(writerOutputDir));
+      }
+
       LOG.warn(String.format("Branch %d of WorkUnit %s produced no data", branchId, state.getId()));
-      return;
+      //return;
     }
 
     // The directory where the final output directory for this job will be placed.
