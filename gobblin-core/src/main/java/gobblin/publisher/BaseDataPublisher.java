@@ -194,14 +194,24 @@ public class BaseDataPublisher extends SingleTaskDataPublisher {
     // The directory where the workUnitState wrote its output data.
     Path writerOutputDir = WriterUtils.getWriterOutputDir(state, this.numBranches, branchId);
 
-    if (!this.writerFileSystemByBranches.get(branchId).exists(writerOutputDir)) {
-      LOG.info("branchtest 0 " + this.writerFileSystemByBranches.size()+ " "+ branchId+ " "+ writerOutputDir);
-      for(FileSystem fs : this.writerFileSystemByBranches){
-        LOG.info("branchtest 1 " + fs.toString() + " " + this.writerFileSystemByBranches.get(branchId).exists(writerOutputDir));
-      }
+    int retry = 3;
+    while(retry>0){
+      if (!this.writerFileSystemByBranches.get(branchId).exists(writerOutputDir)) {
+        retry--;
+        LOG.info("branchtest retry " + retry);
 
-      LOG.warn(String.format("Branch %d of WorkUnit %s produced no data", branchId, state.getId()));
-      //return;
+        if(retry==0){
+          LOG.info("branchtest 0 " + this.writerFileSystemByBranches.size()+ " "+ branchId+ " "+ writerOutputDir);
+          for(FileSystem fs : this.writerFileSystemByBranches){
+            LOG.info("branchtest 1 " + fs.toString() + " " + this.writerFileSystemByBranches.get(branchId).exists(writerOutputDir));
+          }
+
+          LOG.warn(String.format("Branch %d of WorkUnit %s produced no data", branchId, state.getId()));
+          return;
+        }
+      }else{
+        break;
+      }
     }
 
     // The directory where the final output directory for this job will be placed.

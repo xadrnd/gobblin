@@ -181,6 +181,8 @@ $HADOOP_BIN_DIR/hadoop jar \
         gobblin.runtime.mapreduce.CliMRJobLauncher \
         -D mapreduce.user.classpath.first=true \
         -D mapreduce.job.user.classpath.first=true \
+        -D mapreduce.map.memory.mb=2048 \
+        -D mapreduce.map.java.opts=-Xmx1536m \
         -D fs.defaultFS=s3://comet-system \
         $JT_COMMAND \
         $FS_COMMAND \
