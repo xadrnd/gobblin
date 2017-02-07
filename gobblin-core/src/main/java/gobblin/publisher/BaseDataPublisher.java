@@ -194,9 +194,14 @@ public class BaseDataPublisher extends SingleTaskDataPublisher {
     // The directory where the workUnitState wrote its output data.
     Path writerOutputDir = WriterUtils.getWriterOutputDir(state, this.numBranches, branchId);
 
-    int retry = 3;
+    int retry = 5;
     while(retry>0){
       if (!this.writerFileSystemByBranches.get(branchId).exists(writerOutputDir)) {
+        try {
+          Thread.sleep(5000);
+        }catch (Exception e){
+        }
+
         retry--;
         LOG.info("branchtest retry " + retry);
 
