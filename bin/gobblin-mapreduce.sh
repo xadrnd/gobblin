@@ -184,6 +184,7 @@ $HADOOP_BIN_DIR/hadoop jar \
         -D mapreduce.map.memory.mb=2048 \
         -D mapreduce.map.java.opts=-Xmx1536m \
         -D fs.defaultFS=s3://comet-system \
+        -D mapreduce.job.queuename=a \
         $JT_COMMAND \
         $FS_COMMAND \
         -libjars $LIBJARS \
