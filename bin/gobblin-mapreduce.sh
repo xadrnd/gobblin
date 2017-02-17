@@ -177,12 +177,13 @@ FS_COMMAND=$([ -z $FS_URL ] && echo "" || echo "-fs $FS_URL")
 export HADOOP_CLIENT_OPTS="$HADOOP_CLIENT_OPTS -Dgobblin.logs.dir=$GOBBLIN_LOG_DIR -Dlog4j.configuration=file:$FWDIR_CONF/log4j-mapreduce.xml"
 
 # Launch the job to run on Hadoop
-$HADOOP_BIN_DIR/hadoop jar \
+/home/xad/system/hadoop2/bin/hadoop jar \
         $FWDIR_LIB/gobblin-runtime-$GOBBLIN_VERSION.jar \
         gobblin.runtime.mapreduce.CliMRJobLauncher \
         -D mapreduce.user.classpath.first=true \
         -D mapreduce.job.user.classpath.first=true \
         -D mapreduce.map.memory.mb=2048 \
+        -D mapreduce.job.queuename=a \
         $JT_COMMAND \
         $FS_COMMAND \
         -libjars $LIBJARS \
